@@ -1,43 +1,58 @@
 package com.touchlogic.udacity.popularmovies;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.ColorSpace;
-import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
-import android.support.v4.content.ContextCompat;
+import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.touchlogic.udacity.popularmovies.DataModels.MoviePoster;
+import com.touchlogic.udacity.popularmovies.util.NetworkUtils;
 
-import java.net.URL;
+import java.util.ArrayList;
+
 
 public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
 
-    private Uri[] imageLinks;
+    private MoviePoster[] moviesToShow;
+    //    private Uri[] imageLinks;
     private String[] testStrings;
     private LayoutInflater layoutInflater;
     private ItemClickListener itemClickListener;
-    private int[] colorsToUse;
+    //    private int[] colorsToUse;
     private final int numberOfPosters = 9;
 
     private int badCounter = 0;
 
-    MovieRecyclerViewAdapter(Context context, Uri[] imageLinks, String[] textStrings) {
+    MovieRecyclerViewAdapter(Context context) {
         layoutInflater = LayoutInflater.from(context);
-        this.imageLinks = imageLinks;
-        this.testStrings = textStrings;
 
-        colorsToUse = new int[numberOfPosters];
-        for (int i = 0; i < numberOfPosters; i++) {
-            colorsToUse[i] = 0x00FFFF;
+//        colorsToUse = new int[numberOfPosters];
+//        for (int i = 0; i < numberOfPosters; i++) {
+//            colorsToUse[i] = 0x00FFFF;
+//        }
+    }
+
+    public MoviePoster GetMoviePoster(int index) {
+        if (moviesToShow != null && moviesToShow.length > index) {
+            return moviesToShow[index];
+        } else {
+            return null;
         }
+    }
+
+    public void SortMovies(MoviePoster.Sorting sortingToUse) {
+        MoviePoster.SortMovies(moviesToShow, sortingToUse);
+        notifyDataSetChanged();
+    }
+
+    public void SetContentList(MoviePoster[] moviePosters) {
+        moviesToShow = moviePosters;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -50,13 +65,13 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
 
             // I can't figure out how to change the !"#"%€#&% color in the bind function, so I'm doing this here
 //            int colorFromRes = ColorUtils.getViewHolderBackgroundColorFromInstance(parent.getContext(), badCounter++);
-            ViewHolder viewHolder = new ViewHolder(view);
+//            ViewHolder viewHolder = new ViewHolder(view);
 
 //            viewHolder.SetContents("OnCreate", null, 3);
 //            viewHolder.imageButton.setBackgroundColor(colorFromRes);
 //            viewHolder.itemView.setBackgroundColor(colorFromRes);
 
-            return viewHolder;
+            return new ViewHolder(view);
         }
     }
 
@@ -66,7 +81,9 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
 //        Uri uri = Uri.parse("http://www.joblo.com/posters/images/full/the-last-jedi-poster-new.jpg");
 //        Uri uri = Uri.fromParts("http", "www.joblo.com/posters/images/full/the-last-jedi-poster-new.jpg", "");
 
-        viewHolder.SetContents("TEST!", "http://www.joblo.com/posters/images/full/the-last-jedi-poster-new.jpg", position);
+        MoviePoster thisPoster = moviesToShow[position];
+        viewHolder.SetContents(thisPoster);
+//        viewHolder.SetContents("TEST!", "http://www.joblo.com/posters/images/full/the-last-jedi-poster-new.jpg", position);
 //        viewHolder.SetContents(null, null, position);
     }
 
@@ -89,25 +106,43 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return testStrings.length;
+        return moviesToShow != null ? moviesToShow.length : 0;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView imageView;
         private TextView textView;
 
         public ViewHolder(View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.tv_image_test);
-            textView.setOnClickListener(this);
             imageView = itemView.findViewById(R.id.ib_rv_item);
+            imageView.setOnClickListener(v -> {
+                if (itemClickListener != null) {
+                    itemClickListener.launchActivity(getAdapterPosition());
+                }
+            });
+        }
 
+
+        public void SetContents(MoviePoster poster) {
+//            textView.setText(String.format("Pop: %s", poster.popularity));
+            String posterURL = NetworkUtils.getMovieImageURL(poster.poster_path);
+
+            if (posterURL != null && !posterURL.equals("")) {
+                Picasso.with(itemView.getContext())
+                        .load(posterURL)
+                        .into(imageView);
+
+            } else {
+                imageView.setImageResource(R.drawable.no_internet);
+            }
         }
 
         public void SetContents(String debugText, String imagePath, int position) {
 
             if (debugText != null) {
-                textView.setText(debugText + position);
+                textView.setText(String.format("%s%d", debugText, position));
             }
 
             if (imagePath != null) {
@@ -153,12 +188,6 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
 
         }
 
-        @Override
-        public void onClick(View v) {
-            if (itemClickListener != null) {
-                itemClickListener.onItemClick(v, getAdapterPosition());
-            }
-        }
     }
 
     String getItem(int id) {
@@ -172,7 +201,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
 
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
-        void onItemClick(View view, int position);
+        void launchActivity(int position);
     }
 
 }

@@ -6,6 +6,7 @@
     
     <ImageView
         android:id="@+id/ib_rv_item"
+        android:contentDescription="@string/movie_poster_desc"
         android:clickable="true"
         android:focusable="true"
         android:background="@color/colorAccent"

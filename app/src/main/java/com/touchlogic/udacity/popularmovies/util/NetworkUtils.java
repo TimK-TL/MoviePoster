@@ -20,7 +20,7 @@ public class NetworkUtils {
             "api.themoviedb.org";
 
     private final static String MOVIEPOSTER_BASE_IMAGE_URL =
-            "image.tmdb.org/t/p/";
+            "image.tmdb.org";
 
     private final static String API_KEY = "";  // Insert your MovieDB API key here
 
@@ -37,12 +37,14 @@ public class NetworkUtils {
 
     }
 
-    public static void getMovieImage(MovieJSONCallback movieJSONCallback) {
+    public static String getMovieImageURL(String imageID) {
         // http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
 
-        String[] stringsToAppend = {"w185", "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"};
+        // remove the initial '/' from the image filename
+        String fixedImage = imageID.subSequence(1, imageID.length()).toString();
+        String[] stringsToAppend = {"t", "p", "w185", fixedImage};
         URL url = buildUrl(MOVIEPOSTER_BASE_IMAGE_URL, stringsToAppend, false);
-        new MoviePosterQueryTask(movieJSONCallback).execute(url);
+        return url.toString();
     }
 
     public static JSONArray parsePopularMoviesJSON(String stringReturnedFromAsync) {
@@ -69,7 +71,7 @@ public class NetworkUtils {
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
                 .authority(authority);
-        
+
         for (String path : appendPaths) {
             builder.appendPath(path);
         }
@@ -116,14 +118,14 @@ public class NetworkUtils {
         MovieJSONCallback callback;
         JSONArray resultingArray;
 
-        public MoviePosterQueryTask(MovieJSONCallback callback){
+        public MoviePosterQueryTask(MovieJSONCallback callback) {
             this.callback = callback;
         }
 
         @Override
         protected JSONArray doInBackground(URL... urls) {
             URL searchURL = urls[0];
-            String resultingString = null;
+            String resultingString;
             try {
                 resultingString = NetworkUtils.getResponseFromHttpUrl(searchURL);
                 resultingArray = parsePopularMoviesJSON(resultingString);
@@ -142,8 +144,40 @@ public class NetworkUtils {
         }
     }
 
+    public static class MoviePosterImageQueryTask extends AsyncTask<URL, Void, JSONArray> {
+
+        MovieJSONCallback callback;
+        JSONArray resultingArray;
+
+        public MoviePosterImageQueryTask(MovieJSONCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        protected JSONArray doInBackground(URL... urls) {
+            URL searchURL = urls[0];
+            String resultingString;
+            try {
+                resultingString = NetworkUtils.getResponseFromHttpUrl(searchURL);
+                resultingArray = parsePopularMoviesJSON(resultingString);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONArray array) {
+            // return the returnedData via a listener interface
+            callback.onMovieImageReturned(null);
+        }
+    }
+
     public interface MovieJSONCallback {
         void onMoviesReturned(JSONArray moviesArray);
+
         void onMovieImageReturned(URL imageURL);
     }
 }

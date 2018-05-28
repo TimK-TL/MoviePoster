@@ -1,8 +1,10 @@
-package com.touchlogic.udacity.popularmovies;
+package com.touchlogic.udacity.popularmovies.util;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
+
+import com.touchlogic.udacity.popularmovies.R;
 
 public class ColorUtils {
     public static int getViewHolderBackgroundColorFromInstance(Context context, int instanceNum) {
