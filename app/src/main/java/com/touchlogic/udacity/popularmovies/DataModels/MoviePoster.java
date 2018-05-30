@@ -11,6 +11,7 @@ import java.util.Comparator;
 
 public class MoviePoster implements Parcelable {
 
+    // These are all the options returned by the API, but not all have been implemented, because they were deemed unnecessary at this time
     public int vote_count;
     public int id;
     public boolean video;
@@ -68,7 +69,7 @@ public class MoviePoster implements Parcelable {
     }
 
     public enum Sorting {
-        unsorted, highestRated, mostPopular;
+        unsorted, highestRated, mostPopular
     }
 
     public MoviePoster(JSONObject movieItem) {

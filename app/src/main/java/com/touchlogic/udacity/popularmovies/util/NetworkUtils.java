@@ -26,7 +26,7 @@ public class NetworkUtils {
 
 
     public static void getPopularMovies(MovieJSONCallback movieJSONCallback) {
-        // https://api.themoviedb.org/3/movie/76341?api_key={api_key}
+        // example URL ---> https://api.themoviedb.org/3/movie/76341?api_key={api_key}
 
         String[] stringsToAppend = {"3", "movie", "popular"};
         URL url = buildUrl(MOVIEPOSTER_BASE_URL, stringsToAppend, true);
@@ -34,11 +34,11 @@ public class NetworkUtils {
     }
 
     public static void getTopRatedMovies() {
-
+        Log.e("TAG","getTopRatedMovies NOT IMPLEMENTED");
     }
 
     public static String getMovieImageURL(String imageID) {
-        // http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
+        // example URL ---> http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
 
         // remove the initial '/' from the image filename
         String fixedImage = imageID.subSequence(1, imageID.length()).toString();
@@ -49,14 +49,9 @@ public class NetworkUtils {
 
     public static JSONArray parsePopularMoviesJSON(String stringReturnedFromAsync) {
 
-        // TODO: change to a MoviePoster struct/class eventually
-
         try {
             JSONObject jsonObject = new JSONObject(stringReturnedFromAsync);
             JSONArray results = jsonObject.getJSONArray("results");
-
-            String imageFilename;
-            Log.i("TAG", "results" + results.toString());
             return results;
 
         } catch (JSONException e) {
@@ -144,40 +139,7 @@ public class NetworkUtils {
         }
     }
 
-    public static class MoviePosterImageQueryTask extends AsyncTask<URL, Void, JSONArray> {
-
-        MovieJSONCallback callback;
-        JSONArray resultingArray;
-
-        public MoviePosterImageQueryTask(MovieJSONCallback callback) {
-            this.callback = callback;
-        }
-
-        @Override
-        protected JSONArray doInBackground(URL... urls) {
-            URL searchURL = urls[0];
-            String resultingString;
-            try {
-                resultingString = NetworkUtils.getResponseFromHttpUrl(searchURL);
-                resultingArray = parsePopularMoviesJSON(resultingString);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JSONArray array) {
-            // return the returnedData via a listener interface
-            callback.onMovieImageReturned(null);
-        }
-    }
-
     public interface MovieJSONCallback {
         void onMoviesReturned(JSONArray moviesArray);
-
-        void onMovieImageReturned(URL imageURL);
     }
 }

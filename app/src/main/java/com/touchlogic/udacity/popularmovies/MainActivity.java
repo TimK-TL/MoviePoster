@@ -60,11 +60,6 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     }
 
     @Override
-    public void onItemClick(View view, int position) {
-        Log.e("TAG","onItemClick - Not implemented!");
-    }
-
-    @Override
     public void launchActivity(int position) {
         Intent intent = new Intent(this, DetailActivity.class);
         MoviePoster posterToSend = adapter.GetMoviePoster(position);
@@ -81,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             return;
         }
 
-        Log.i("TAG","returned movies to Main: " + moviesArray.toString());
+//        Log.i("TAG","returned movies to Main: " + moviesArray.toString());
 
         MoviePoster[] moviesFound = new MoviePoster[moviesArray.length()];
 
@@ -97,19 +92,10 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             }
         }
 
-        // begin downloading the images
-//        NetworkUtils.getMovieImage(moviesFound[0].poster_path, this);
-
         // update the list immediately with the texts found, while waiting for the images to download
         if(adapter != null){
             adapter.SetContentList(moviesFound);
         }
-
-    }
-
-    @Override
-    public void onMovieImageReturned(URL imageURL) {
-        Log.i("TAG","imageURL returned: " + imageURL);
 
     }
 

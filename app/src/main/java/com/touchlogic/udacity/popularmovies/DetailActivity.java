@@ -12,8 +12,6 @@ import com.squareup.picasso.Picasso;
 import com.touchlogic.udacity.popularmovies.DataModels.MoviePoster;
 import com.touchlogic.udacity.popularmovies.util.NetworkUtils;
 
-import java.util.ArrayList;
-
 public class DetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_MOVIE = "moviePoster";
