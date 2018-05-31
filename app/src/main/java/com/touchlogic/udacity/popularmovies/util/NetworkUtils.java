@@ -2,7 +2,10 @@ package com.touchlogic.udacity.popularmovies.util;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
+
+import com.touchlogic.udacity.popularmovies.BuildConfig;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,14 +19,25 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class NetworkUtils {
-    private final static String MOVIEPOSTER_BASE_URL =
-            "api.themoviedb.org";
+    public enum Sorting {
+        popularMovies, topRated
+    }
 
-    private final static String MOVIEPOSTER_BASE_IMAGE_URL =
-            "image.tmdb.org";
+    private final static String MOVIEPOSTER_BASE_URL = "api.themoviedb.org";
+    private final static String MOVIEPOSTER_BASE_IMAGE_URL = "image.tmdb.org";
 
-    private final static String API_KEY = "";  // Insert your MovieDB API key here
+    /// Get new movies from the server based on the seleted sorting option
+    public static void getMoviesBasedOnSorting(Sorting networkSorting, MovieJSONCallback movieJSONCallback){
+        switch (networkSorting) {
+            case popularMovies:
+                getPopularMovies(movieJSONCallback);
+                break;
+            case topRated:
+                getTopRatedMovies(movieJSONCallback);
+                break;
+        }
 
+    }
 
     public static void getPopularMovies(MovieJSONCallback movieJSONCallback) {
         // example URL ---> https://api.themoviedb.org/3/movie/76341?api_key={api_key}
@@ -33,8 +47,12 @@ public class NetworkUtils {
         new MoviePosterQueryTask(movieJSONCallback).execute(url);
     }
 
-    public static void getTopRatedMovies() {
-        Log.e("TAG","getTopRatedMovies NOT IMPLEMENTED");
+    public static void getTopRatedMovies(MovieJSONCallback movieJSONCallback) {
+        // example URL ---> http://api.themoviedb.org/3/movie/top_rated?api_key={api_key}
+
+        String[] stringsToAppend = {"3", "movie", "top_rated"};
+        URL url = buildUrl(MOVIEPOSTER_BASE_URL, stringsToAppend, true);
+        new MoviePosterQueryTask(movieJSONCallback).execute(url);
     }
 
     public static String getMovieImageURL(String imageID) {
@@ -72,7 +90,7 @@ public class NetworkUtils {
         }
 
         if (includeAPIKey) {
-            builder.appendQueryParameter("api_key", API_KEY);
+            builder.appendQueryParameter("api_key", BuildConfig.APP_KEY);
         }
 
         Uri builtUri = builder.build();

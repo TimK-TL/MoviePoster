@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 
+
 android {
     compileSdkVersion 26
     defaultConfig {
@@ -16,10 +17,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    buildTypes.each {
+        it.buildConfigField 'String', 'APP_KEY', moviePosterApiKey
+    }
+
     compileOptions {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
+
 }
 
 dependencies {

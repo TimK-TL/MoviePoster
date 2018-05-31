@@ -1,25 +1,20 @@
 package com.touchlogic.udacity.popularmovies;
 
 import android.content.Context;
-import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.touchlogic.udacity.popularmovies.DataModels.MoviePoster;
 import com.touchlogic.udacity.popularmovies.util.NetworkUtils;
 
-import java.util.ArrayList;
-
 
 public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
 
     private MoviePoster[] moviesToShow;
-    private String[] testStrings;
     private LayoutInflater layoutInflater;
     private ItemClickListener itemClickListener;
     private final int numberOfPosters = 9;
@@ -28,7 +23,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
         layoutInflater = LayoutInflater.from(context);
     }
 
-    public MoviePoster GetMoviePoster(int index) {
+    public MoviePoster getMoviePoster(int index) {
         if (moviesToShow != null && moviesToShow.length > index) {
             return moviesToShow[index];
         } else {
@@ -36,14 +31,15 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public void SortMovies(MoviePoster.Sorting sortingToUse) {
-        MoviePoster.SortMovies(moviesToShow, sortingToUse);
+    public void sortMovies(MoviePoster.Sorting sortingToUse) {
+        MoviePoster.sortMovies(moviesToShow, sortingToUse);
         notifyDataSetChanged();
     }
 
-    public void SetContentList(MoviePoster[] moviePosters) {
+    public void setContentList(MoviePoster[] moviePosters, MoviePoster.Sorting sorting) {
         moviesToShow = moviePosters;
-        notifyDataSetChanged();
+        // update local sorting before showing the new list of movies
+        sortMovies(sorting);
     }
 
     @Override
@@ -62,25 +58,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
         ViewHolder viewHolder = (ViewHolder) holder;
 
         MoviePoster thisPoster = moviesToShow[position];
-        viewHolder.SetContents(thisPoster);
-    }
-
-    /// This was an attempt at dynamically making colours to use in the bind for the various cells (NOT USED)
-    private int getColourForIndex(int indexToCheck) {
-        float currentPercentage = ((float) indexToCheck / (float) numberOfPosters);
-//        int currentAlpha = (int)(currentPercentage * 0xFF);
-        int colourVariation = (int) (((float) indexToCheck / (float) numberOfPosters) * (float) 0xFF);
-        String hexString = Integer.toString(colourVariation, 16);
-        String hexStringTwoChars = (hexString.equals("0")) ? "00" : hexString;
-        String hexStringCompleted = "#FF" + hexStringTwoChars + "FF";
-
-//        int colourIncrement = (int)((float)indexToCheck * (float)0xFFFFFF);
-//        int baseColour = 0x00FFFFFF;
-//        int currentColour = baseColour + colourIncrement;
-
-        int color = Integer.parseInt(hexStringCompleted.replaceFirst("^#", ""), 16);
-
-        return color;
+        viewHolder.setContents(thisPoster);
     }
 
     @Override
@@ -102,7 +80,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
         }
 
 
-        public void SetContents(MoviePoster poster) {
+        public void setContents(MoviePoster poster) {
             String posterURL = NetworkUtils.getMovieImageURL(poster.poster_path);
 
             if (posterURL != null && !posterURL.equals("")) {

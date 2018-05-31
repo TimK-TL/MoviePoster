@@ -2,7 +2,6 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,8 +9,8 @@
         android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="200dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="@dimen/margin_text_standard"
+        android:layout_marginRight="@dimen/margin_text_standard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,76 +36,26 @@
             android:orientation="vertical"
             android:textAlignment="center">
 
-            <TextView
+            <include layout="@layout/details_tv_bold"
                 android:id="@+id/tv_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text=""
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageView"
-                tools:text="Title" />
+                />
 
-            <TextView
+            <include layout="@layout/details_tv_italic"
                 android:id="@+id/tv_release_date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text=""
-                android:textStyle="italic"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView4"
-                tools:text="Release 01-01-2020" />
+                />
 
-            <TextView
+            <include layout="@layout/details_tv_italic"
                 android:id="@+id/tv_vote_average"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text=""
-                android:textStyle="italic"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_plot_synopsis"
-                tools:text="Average vote 432.5" />
+                />
 
-            <TextView
+            <include layout="@layout/details_tv_normal"
                 android:id="@+id/tv_plot_synopsis"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text=""
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_title"
-                tools:text="Epic movie bla bla bla \n bla bla bla \n booola bla bla" />
+                />
+
 
         </LinearLayout>
     </ScrollView>

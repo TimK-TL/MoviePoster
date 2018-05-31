@@ -88,7 +88,7 @@ public class MoviePoster implements Parcelable {
         }
     }
 
-    public static void SortMovies(MoviePoster[] moviesToSort, Sorting sortingToUse) {
+    public static void sortMovies(MoviePoster[] moviesToSort, Sorting sortingToUse) {
 
         Arrays.sort(moviesToSort, new Comparator<MoviePoster>() {
             @Override

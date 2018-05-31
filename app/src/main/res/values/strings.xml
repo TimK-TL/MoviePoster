@@ -3,4 +3,6 @@
     <string name="movie_poster_desc">movie poster image</string>
     <string name="sort_movies">Sort Movies</string>
     <string name="detail_error_message">No movie poster detected</string>
+    <string name="sort_api_popular">Most Popular</string>
+    <string name="sort_api_highest_rated">Highest Rated</string>
 </resources>
