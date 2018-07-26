@@ -26,38 +26,15 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     private MoviePoster.Sorting sorting = MoviePoster.Sorting.mostPopular;
     private NetworkUtils.Sorting sortingApi = NetworkUtils.Sorting.popularMovies;
 
-    /// Change local sorting of the movies
-    private void changeSorting(){
-        switch (sorting) {
-            case unsorted:
-                sorting = MoviePoster.Sorting.highestRated;
-                break;
-            case highestRated:
-                sorting = MoviePoster.Sorting.mostPopular;
-                break;
-            case mostPopular:
-                sorting = MoviePoster.Sorting.highestRated; // I don't want it to go back to unsorted
-                break;
-        }
-    }
-
-    /// Fetch movies from a different sorting option (popularMovies and topRated)
-    private void changeSortingFromAPI(){
-        switch (sortingApi) {
-            case popularMovies:
-                changeSortingFromAPITo(NetworkUtils.Sorting.topRated);
-                break;
-            case topRated:
-                changeSortingFromAPITo(NetworkUtils.Sorting.popularMovies);
-                break;
-        }
-    }
-
     private void changeSortingFromAPITo(NetworkUtils.Sorting sortingApiOverride){
             sortingApi = sortingApiOverride;
     }
 
 
+    /*
+    Your request process is right! But you are redoing it everytime the activity is recreated (device is rotated, for example). It is inefficient to recall the webservice.
+    It would be awesome if you implement a way to save your results to bundle at onSaveInstanceState() and retrieve it at onCreate() or onRestoreInstanceState() for your next stage
+    * */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,17 +94,15 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         return true;
     }
 
+    /*
+    It is okay that you used this approach to update the main UI when user changes the sort criteria.
+    But it doesn't retain the choice of user when you quit your app or the configuration changes ( device rotated). It is going to set "Popular movie" by default
+    You can use SharedPreferences to save this value and get it onCreate()
+    * */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int menuItemSelected = item.getItemId();
-        // I read the assignment as having to sort the local movies, but I had to call the API for two different lists of movies... so, this has been removed :(
-//        if (menuItemSelected == R.id.mi_sort){
-//            Context context = MainActivity.this;
-//            changeSorting();
-//            adapter.sortMovies(sorting);
-//            Toast.makeText(context, "Sorting current movies by " + sorting.toString(), Toast.LENGTH_SHORT).show();
-//        } else
-            if (menuItemSelected == R.id.mi_sort_api_popular){
+        if (menuItemSelected == R.id.mi_sort_api_popular){
             Context context = MainActivity.this;
             changeSortingFromAPITo(NetworkUtils.Sorting.popularMovies);
             NetworkUtils.getMoviesBasedOnSorting(sortingApi, this);

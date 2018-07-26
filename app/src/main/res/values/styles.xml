@@ -8,4 +8,29 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppTheme.DetailsTextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">@dimen/margin_text_standard</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="AppTheme.DetailsTextView.Normal">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">@dimen/small_text_size</item>
+    </style>
+
+    <style name="AppTheme.DetailsTextView.Bold" parent="AppTheme.DetailsTextView">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/small_text_size</item>
+    </style>
+
+    <style name="AppTheme.DetailsTextView.Italic" parent="AppTheme.DetailsTextView">
+        <item name="android:textStyle">italic</item>
+        <item name="android:textSize">@dimen/small_text_size</item>
+    </style>
+
+
+
+
 </resources>
