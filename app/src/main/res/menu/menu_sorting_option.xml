@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/mi_sort"
-        android:title="@string/sort_movies"
-        android:orderInCategory="1"
-        android:enabled="true"
-        android:visible="true"
-        app:showAsAction="ifRoom"
-        />
 
     <item
         android:id="@+id/mi_sort_api_popular"
@@ -22,6 +14,15 @@
     <item
         android:id="@+id/mi_sort_api_highest_rated"
         android:title="@string/sort_api_highest_rated"
+        android:orderInCategory="1"
+        android:enabled="true"
+        android:visible="true"
+        app:showAsAction="collapseActionView"
+        />
+
+    <item
+        android:id="@+id/mi_sort_api_favorites"
+        android:title="@string/mi_sort_api_favorites"
         android:orderInCategory="1"
         android:enabled="true"
         android:visible="true"

@@ -5,4 +5,12 @@
     <string name="detail_error_message">No movie poster detected</string>
     <string name="sort_api_popular">Most Popular</string>
     <string name="sort_api_highest_rated">Highest Rated</string>
+    <string name="trailerTitle">Trailers</string>
+    <string name="reviewTitle">Reviews</string>
+    <string name="menu_favorite_title">Fav</string>
+    <string name="menu_unfavorite_title">UnFav</string>
+    <string name="mi_sort_api_favorites">Favorites</string>
+    <string name="tv_trailers_title">Trailers</string>
+    <string name="tv_reviews_title">Reviews</string>
+    <string name="desc_movie_poster">Movie Poster</string>
 </resources>

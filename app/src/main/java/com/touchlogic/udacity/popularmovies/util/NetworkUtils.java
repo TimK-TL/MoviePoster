@@ -1,9 +1,10 @@
 package com.touchlogic.udacity.popularmovies.util;
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.util.Log;
 
 import com.touchlogic.udacity.popularmovies.BuildConfig;
 
@@ -18,9 +19,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
+
 public class NetworkUtils {
     public enum Sorting {
-        popularMovies, topRated
+        popularMovies, topRated, favorites
     }
 
     private final static String MOVIEPOSTER_BASE_URL = "api.themoviedb.org";
@@ -36,7 +38,6 @@ public class NetworkUtils {
                 getTopRatedMovies(movieJSONCallback);
                 break;
         }
-
     }
 
     public static void getPopularMovies(MovieJSONCallback movieJSONCallback) {
@@ -55,12 +56,50 @@ public class NetworkUtils {
         new MoviePosterQueryTask(movieJSONCallback).execute(url);
     }
 
-    public static String getMovieImageURL(String imageID) {
+    public static void getTrailersForMovie(TrailersJSONCallback trailersJSONCallback, int movieID) {
+        // example URL ---> https://api.themoviedb.org/3/movie/353081/videos?api_key={api_key}
+
+        String[] stringsToAppend = {"3", "movie", String.valueOf(movieID), "videos"};
+        URL url = buildUrl(MOVIEPOSTER_BASE_URL, stringsToAppend, true);
+        new MovieTrailerQueryTask(trailersJSONCallback).execute(url);
+    }
+
+    public static void getReviewsForMovie(ReviewsJSONCallback reviewsJSONCallback, int movieID) {
+        // example URL ---> https://api.themoviedb.org/3/movie/351286/reviews?api_key={api_key}
+
+        String[] stringsToAppend = {"3", "movie", String.valueOf(movieID), "reviews"};
+        URL url = buildUrl(MOVIEPOSTER_BASE_URL, stringsToAppend, true);
+        new MovieReviewsQueryTask(reviewsJSONCallback).execute(url);
+    }
+
+    // https://stackoverflow.com/questions/574195/android-youtube-app-play-video-intent
+    public static void watchYoutubeVideo(Context context, String id){
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=" + id));
+        try {
+            context.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            context.startActivity(webIntent);
+        }
+    }
+
+    /// quality = {0: original, 1: w780, 2: w500, 3: w342}
+    public static String getMovieImageURL(String imageID, int quality) {
         // example URL ---> http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
+
+        String qualityStr = "";
+        switch (quality){
+            case 0: qualityStr = "original"; break;
+            case 1: qualityStr = "w780"; break;
+            case 2: qualityStr = "w500"; break;
+            case 3: qualityStr = "w342"; break;
+            default:qualityStr = "w342"; break;
+        }
 
         // remove the initial '/' from the image filename
         String fixedImage = imageID.subSequence(1, imageID.length()).toString();
-        String[] stringsToAppend = {"t", "p", "w185", fixedImage};
+        String[] stringsToAppend = {"t", "p", qualityStr, fixedImage};  //sizes: https://www.themoviedb.org/talk/53c11d4ec3a3684cf4006400
         URL url = buildUrl(MOVIEPOSTER_BASE_IMAGE_URL, stringsToAppend, false);
         return url.toString();
     }
@@ -157,7 +196,80 @@ public class NetworkUtils {
         }
     }
 
+    // Call the URL in an async task, and return the result
+    public static class MovieTrailerQueryTask extends AsyncTask<URL, Void, JSONArray> {
+
+        TrailersJSONCallback callback;
+        JSONArray resultingArray;
+
+        public MovieTrailerQueryTask(TrailersJSONCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        protected JSONArray doInBackground(URL... urls) {
+            URL searchURL = urls[0];
+            String resultingString;
+            try {
+                resultingString = NetworkUtils.getResponseFromHttpUrl(searchURL);
+                resultingArray = parsePopularMoviesJSON(resultingString);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONArray array) {
+            // return the returnedData via a listener interface
+            callback.onMovieTrailersReturned(resultingArray);
+        }
+    }
+
+    // Call the URL in an async task, and return the result
+    public static class MovieReviewsQueryTask extends AsyncTask<URL, Void, JSONArray> {
+
+        ReviewsJSONCallback callback;
+        JSONArray resultingArray;
+
+        public MovieReviewsQueryTask(ReviewsJSONCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        protected JSONArray doInBackground(URL... urls) {
+            URL searchURL = urls[0];
+            String resultingString;
+            try {
+                resultingString = NetworkUtils.getResponseFromHttpUrl(searchURL);
+                resultingArray = parsePopularMoviesJSON(resultingString);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONArray array) {
+            // return the returnedData via a listener interface
+            callback.onMovieReviewsReturned(resultingArray);
+        }
+    }
+
     public interface MovieJSONCallback {
         void onMoviesReturned(JSONArray moviesArray);
+    }
+
+
+    public interface TrailersJSONCallback {
+        void onMovieTrailersReturned(JSONArray trailersArray);
+    }
+
+    public interface ReviewsJSONCallback {
+        void onMovieReviewsReturned(JSONArray reviewsArray);
     }
 }

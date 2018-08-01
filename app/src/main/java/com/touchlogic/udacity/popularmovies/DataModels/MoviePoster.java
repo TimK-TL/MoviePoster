@@ -3,6 +3,8 @@ package com.touchlogic.udacity.popularmovies.DataModels;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.touchlogic.udacity.popularmovies.database.MovieEntry;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,12 +29,14 @@ public class MoviePoster implements Parcelable {
     public String overview;
     public String release_date;
 
+    /// If the user chosen to favorite this movie
+    public boolean isFavorited;
+
     public static final Parcelable.Creator<MoviePoster> CREATOR
             = new Parcelable.Creator<MoviePoster>() {
 
         public MoviePoster createFromParcel(Parcel in) {
-            MoviePoster posterToMake = new MoviePoster(in);
-            return posterToMake;
+            return new MoviePoster(in);
         }
 
         public MoviePoster[] newArray(int size) {
@@ -49,7 +53,7 @@ public class MoviePoster implements Parcelable {
         vote_average = source.readFloat();
         popularity = source.readFloat();
         release_date = source.readString();
-
+        isFavorited = source.readInt() == 1;
     }
 
     @Override
@@ -66,6 +70,7 @@ public class MoviePoster implements Parcelable {
         dest.writeFloat(vote_average);
         dest.writeFloat(popularity);
         dest.writeString(release_date);
+        dest.writeInt(isFavorited ? 1 : 0);
     }
 
     public enum Sorting {
@@ -83,26 +88,38 @@ public class MoviePoster implements Parcelable {
             this.release_date = movieItem.getString("release_date");
             this.popularity = ((float) movieItem.getLong("popularity"));
             this.vote_average = ((float) movieItem.getLong("vote_average"));
+            this.isFavorited = false;
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
+    public MoviePoster(MovieEntry movieEntry){
+        this.id = movieEntry.id;
+        this.video = movieEntry.video;
+        this.title = movieEntry.title;
+        this.poster_path = movieEntry.poster_path;
+        this.backdrop_path = movieEntry.backdrop_path;
+        this.overview = movieEntry.overview;
+        this.release_date = movieEntry.release_date;
+        this.popularity = movieEntry.popularity;
+        this.vote_average = movieEntry.vote_average;
+        this.isFavorited = movieEntry.isFavorited;
+    }
+
     public static void sortMovies(MoviePoster[] moviesToSort, Sorting sortingToUse) {
 
-        Arrays.sort(moviesToSort, new Comparator<MoviePoster>() {
-            @Override
-            public int compare(MoviePoster o1, MoviePoster o2) {
+        Arrays.sort(moviesToSort, (o1, o2) -> {
 
-                if (sortingToUse == Sorting.highestRated) {
+            switch (sortingToUse) {
+                case highestRated:
                     return o1.vote_average > o2.vote_average ? -1 : 1;
-                } else if (sortingToUse == Sorting.mostPopular) {
+                case mostPopular:
                     return o1.popularity > o2.popularity ? -1 : 1;
-                } else {
+                default:
                     return 0;
-                }
-
             }
+
         });
 
     }

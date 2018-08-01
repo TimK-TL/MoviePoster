@@ -81,7 +81,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
 
 
         public void setContents(MoviePoster poster) {
-            String posterURL = NetworkUtils.getMovieImageURL(poster.poster_path);
+            String posterURL = NetworkUtils.getMovieImageURL(poster.poster_path, 3);
 
             if (posterURL != null && !posterURL.equals("")) {
                 Picasso.with(itemView.getContext())
