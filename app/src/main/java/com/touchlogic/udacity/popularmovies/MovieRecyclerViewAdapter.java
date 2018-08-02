@@ -11,6 +11,10 @@ import com.squareup.picasso.Picasso;
 import com.touchlogic.udacity.popularmovies.DataModels.MoviePoster;
 import com.touchlogic.udacity.popularmovies.util.NetworkUtils;
 
+import java.util.List;
+
+import butterknife.BindView;
+
 
 public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
 
@@ -57,7 +61,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ViewHolder viewHolder = (ViewHolder) holder;
 
-        MoviePoster thisPoster = moviesToShow[position];
+        MoviePoster thisPoster = moviesToShow[viewHolder.getAdapterPosition()];
         viewHolder.setContents(thisPoster);
     }
 
@@ -86,6 +90,8 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter {
             if (posterURL != null && !posterURL.equals("")) {
                 Picasso.with(itemView.getContext())
                         .load(posterURL)
+                        .placeholder(android.R.drawable.progress_indeterminate_horizontal)
+                        .error(android.R.drawable.stat_notify_error)
                         .into(imageView);
 
             } else {

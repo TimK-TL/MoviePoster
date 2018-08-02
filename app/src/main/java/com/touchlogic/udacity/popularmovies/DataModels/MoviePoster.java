@@ -15,17 +15,90 @@ public class MoviePoster implements Parcelable {
 
     // These are all the options returned by the API, but not all have been implemented, because they were deemed unnecessary at this time
     public int vote_count;
+    public boolean adult;
+    public String original_language;
+    public String original_title;
+    public int[] genre_ids;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public boolean isVideo() {
+        return video;
+    }
+
+    public void setVideo(boolean video) {
+        this.video = video;
+    }
+
+    public float getVote_average() {
+        return vote_average;
+    }
+
+    public void setVote_average(float vote_average) {
+        this.vote_average = vote_average;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public float getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(float popularity) {
+        this.popularity = popularity;
+    }
+
+    public String getPoster_path() {
+        return poster_path;
+    }
+
+    public void setPoster_path(String poster_path) {
+        this.poster_path = poster_path;
+    }
+
+    public String getBackdrop_path() {
+        return backdrop_path;
+    }
+
+    public void setBackdrop_path(String backdrop_path) {
+        this.backdrop_path = backdrop_path;
+    }
+
+    public String getOverview() {
+        return overview;
+    }
+
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public String getRelease_date() {
+        return release_date;
+    }
+
+    public void setRelease_date(String release_date) {
+        this.release_date = release_date;
+    }
+
     public int id;
     public boolean video;
     public float vote_average;
     public String title;
     public float popularity;
     public String poster_path;
-    public String original_language;
-    public String original_title;
-    public int[] genre_ids;
     public String backdrop_path;
-    public boolean adult;
     public String overview;
     public String release_date;
 
@@ -74,7 +147,26 @@ public class MoviePoster implements Parcelable {
     }
 
     public enum Sorting {
-        unsorted, highestRated, mostPopular
+        unsorted(0), highestRated(1), mostPopular(2), favorites(3);
+
+        public final int index;
+        Sorting(int index) {
+            this.index = index;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public static Sorting makeFromIndex(int index){
+            switch (index){
+                case 0: return Sorting.unsorted;
+                case 1: return Sorting.highestRated;
+                case 2: return Sorting.mostPopular;
+                case 3: return Sorting.favorites;
+                default: return Sorting.unsorted;
+            }
+        }
     }
 
     public MoviePoster(JSONObject movieItem) {

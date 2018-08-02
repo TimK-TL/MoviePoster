@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,6 +26,7 @@ import com.touchlogic.udacity.popularmovies.DataModels.MovieTrailer;
 import com.touchlogic.udacity.popularmovies.database.AppDatabase;
 import com.touchlogic.udacity.popularmovies.database.MovieEntry;
 import com.touchlogic.udacity.popularmovies.util.NetworkUtils;
+import com.touchlogic.udacity.popularmovies.util.RetrofitController;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,21 +34,26 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class DetailActivity extends AppCompatActivity implements NetworkUtils.TrailersJSONCallback, NetworkUtils.ReviewsJSONCallback {
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import timber.log.Timber;
+
+public class DetailActivity extends AppCompatActivity implements RetrofitController.TrailersReturned, RetrofitController.ReviewsReturned {
 
     public static final String EXTRA_MOVIE = "moviePoster";
 
     private MoviePoster moviePoster;
 
-    private TextView title;
-    private TextView description;
-    private TextView ratings;
-    private TextView releaseDate;
-    private ImageView iv_top_poster;
-    private TextView trailerTitle;
-    private TextView reviewsTitle;
-    private LinearLayout linearLayoutTrailers;
-    private LinearLayout linearLayoutReviews;
+    @BindView(R.id.tv_title) TextView title;
+    @BindView(R.id.tv_plot_synopsis) TextView description;
+    @BindView(R.id.tv_vote_average) TextView ratings;
+    @BindView(R.id.tv_release_date) TextView releaseDate;
+    @BindView(R.id.iv_top_poster) ImageView iv_top_poster;
+    @BindView(R.id.tv_trailer_title) TextView trailerTitle;
+    @BindView(R.id.tv_reviews_title) TextView reviewsTitle;
+    @BindView(R.id.linearLayout_trailers) LinearLayout linearLayoutTrailers;
+    @BindView(R.id.linearLayout_reviews) LinearLayout linearLayoutReviews;
+
 
     // Member variables for the Database access
     private AppDatabase mDb;
@@ -56,8 +63,8 @@ public class DetailActivity extends AppCompatActivity implements NetworkUtils.Tr
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.detail_view);
+        ButterKnife.bind(this);
 
         mDb = AppDatabase.getInstance(getApplicationContext());
         moviesFav = mDb.taskDao().loadAllTasks();
@@ -71,7 +78,7 @@ public class DetailActivity extends AppCompatActivity implements NetworkUtils.Tr
                     }
                 }
             } else {
-                Log.d("DBG", "FAILED; no movies were found!");
+                Timber.d("FAILED; no movies were found!");
             }
         });
 
@@ -92,8 +99,8 @@ public class DetailActivity extends AppCompatActivity implements NetworkUtils.Tr
 
         populateUI();
 
-        NetworkUtils.getTrailersForMovie(this, this.moviePoster.id);
-        NetworkUtils.getReviewsForMovie(this, this.moviePoster.id);
+        RetrofitController.getTrailersForMovie(this.moviePoster.id, this);
+        RetrofitController.getReviewsForMovie(this.moviePoster.id, this);
     }
 
     private void closeOnError() {
@@ -117,7 +124,7 @@ public class DetailActivity extends AppCompatActivity implements NetworkUtils.Tr
                     menuItem.setIcon(getResources().getDrawable(android.R.drawable.btn_star_big_off));
                 }
             } else {
-                Log.d("DBG", "FAILED to find menu variable");
+                Timber.d("FAILED to find menu variable");
             }
 
         });
@@ -125,26 +132,15 @@ public class DetailActivity extends AppCompatActivity implements NetworkUtils.Tr
     }
 
     private void populateUI() {
-        title = findViewById(R.id.tv_title);
+
         title.setText(moviePoster.title);
-
-        trailerTitle = findViewById(R.id.tv_trailer_title);
         trailerTitle.setText(R.string.trailerTitle);
-
-        reviewsTitle = findViewById(R.id.tv_reviews_title);
         reviewsTitle.setText(R.string.reviewTitle);
-
-        description = findViewById(R.id.tv_plot_synopsis);
         description.setText(moviePoster.overview);
-
-        ratings = findViewById(R.id.tv_vote_average);
         ratings.setText(String.format("Avg. Rating: %s", moviePoster.vote_average));
-
-        releaseDate = findViewById(R.id.tv_release_date);
         releaseDate.setText(moviePoster.release_date);
 
         // it seems as if I need to save the previous image to a file, to be able to efficiently load it before the high-res image is ready... but I haven't done this.
-        iv_top_poster = findViewById(R.id.iv_top_poster);
         String posterURLHigh = NetworkUtils.getMovieImageURL(moviePoster.poster_path, 1);
         Picasso.with(getBaseContext())
                 .load(posterURLHigh)
@@ -158,7 +154,6 @@ public class DetailActivity extends AppCompatActivity implements NetworkUtils.Tr
 
     private void populateTrailerItems(MovieTrailer[] trailers) {
         // Generate the several trailer options as individual elements in this card (NOTE: not a recyclerView because we expect only a few instances of light-weight views)
-        linearLayoutTrailers = findViewById(R.id.linearLayout_trailers);
         LayoutInflater layoutInflater = getLayoutInflater();
         View view;
 
@@ -186,7 +181,6 @@ public class DetailActivity extends AppCompatActivity implements NetworkUtils.Tr
 
     private void populateReviewItems(MovieReview[] reviews) {
         // Generate the several trailer options as individual elements in this card (NOTE: not a recyclerView because we expect only a few instances of light-weight views)
-        linearLayoutReviews = findViewById(R.id.linearLayout_reviews);
         LayoutInflater layoutInflater = getLayoutInflater();
         View view;
 
@@ -205,59 +199,17 @@ public class DetailActivity extends AppCompatActivity implements NetworkUtils.Tr
     }
 
     @Override
-    public void onMovieTrailersReturned(JSONArray trailersArray) {
-        // we've received the available trailers for the selected movie
-
-        if (trailersArray == null) {
-            Log.e("TAG", "trailersArray was null");
-            return;
-        }
-
-        MovieTrailer[] trailersFound = new MovieTrailer[trailersArray.length()];
-
-        for (int i = 0; i < trailersArray.length(); i++) {
-
-            try {
-                JSONObject trailerItem = trailersArray.getJSONObject(i);
-                trailersFound[i] = new MovieTrailer(trailerItem);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                trailersFound[i] = null;
-            }
-        }
-
+    public void onMovieTrailersReturned(List<MovieTrailer> trailersArray) {
         // load the trailer texts and links into the details page
-        if (trailersFound.length > 0) {
-            populateTrailerItems(trailersFound);
+        if (trailersArray.size() > 0) {
+            populateTrailerItems(trailersArray.toArray(new MovieTrailer[trailersArray.size()]));
         }
     }
 
     @Override
-    public void onMovieReviewsReturned(JSONArray reviewsArray) {
-        // we've received the available reviews for the selected movie
-
-        if (reviewsArray == null) {
-            Log.e("TAG", "reviewsArray was null");
-            return;
-        }
-
-        MovieReview[] reviewsFound = new MovieReview[reviewsArray.length()];
-
-        for (int i = 0; i < reviewsArray.length(); i++) {
-
-            try {
-                JSONObject trailerItem = reviewsArray.getJSONObject(i);
-                reviewsFound[i] = new MovieReview(trailerItem);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                reviewsFound[i] = null;
-            }
-        }
-
-        if (reviewsFound.length > 0) {
-            populateReviewItems(reviewsFound);
+    public void onMovieReviewsReturned(List<MovieReview> reviewsArray) {
+        if (reviewsArray.size() > 0) {
+            populateReviewItems(reviewsArray.toArray(new MovieReview[reviewsArray.size()]));
         }
     }
 
@@ -319,7 +271,7 @@ public class DetailActivity extends AppCompatActivity implements NetworkUtils.Tr
             if (movieEntry != null){
                 mDb.taskDao().deleteTask( movieEntry );
             } else {
-                Log.d("DBG", "movie poster entry NOT FOUND. Can't delete it from the database!");
+                Timber.d("movie poster entry NOT FOUND. Can't delete it from the database!");
             }
         });
     }

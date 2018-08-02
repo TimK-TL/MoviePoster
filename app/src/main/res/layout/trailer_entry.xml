@@ -1,25 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+
+
+<TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tv_trailer_entry"
     android:layout_width="match_parent"
     android:layout_height="100dp"
-    android:orientation="horizontal">
+    android:drawableLeft="@android:drawable/ic_media_play"
+    android:drawableStart="@android:drawable/ic_media_play"
+    android:drawablePadding="@dimen/margin_text_standard"
+    android:layout_marginLeft="@dimen/margin_text_standard"
+    android:layout_marginStart="@dimen/margin_text_standard"
+    android:layout_marginRight="@dimen/margin_text_standard"
+    android:layout_marginEnd="@dimen/margin_text_standard"
+    tools:text="Some Trailer Title"
+    android:gravity="center_vertical"
+    android:textStyle="bold"
+    />
 
-    <TextView
-        android:id="@+id/tv_trailer_entry"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:drawableLeft="@android:drawable/ic_media_play"
-        android:drawableStart="@android:drawable/ic_media_play"
-        android:drawablePadding="@dimen/margin_text_standard"
-        android:layout_marginLeft="@dimen/margin_text_standard"
-        android:layout_marginStart="@dimen/margin_text_standard"
-        android:layout_marginRight="@dimen/margin_text_standard"
-        android:layout_marginEnd="@dimen/margin_text_standard"
-        tools:text="Some Trailer Title"
-        android:gravity="center_vertical"
-        android:textStyle="bold"
-        />
-
-</android.support.constraint.ConstraintLayout>
