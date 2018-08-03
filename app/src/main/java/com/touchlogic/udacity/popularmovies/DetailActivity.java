@@ -230,7 +230,7 @@ public class DetailActivity extends AppCompatActivity implements RetrofitControl
         int menuItemSelected = item.getItemId();
         if (menuItemSelected == R.id.mi_fav) {
             Context context = DetailActivity.this;
-            Toast.makeText(context, "Clicked FAV btn", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.toast_fav_clicked, Toast.LENGTH_SHORT).show();
 
             this.moviePoster.isFavorited = !this.moviePoster.isFavorited;
 

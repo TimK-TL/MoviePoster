@@ -5,11 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -20,13 +18,8 @@ import com.touchlogic.udacity.popularmovies.database.MovieEntry;
 import com.touchlogic.udacity.popularmovies.util.NetworkUtils;
 import com.touchlogic.udacity.popularmovies.util.RetrofitController;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.List;
 
-import butterknife.BindView;
 import timber.log.Timber;
 
 
@@ -34,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
 
     private MovieRecyclerViewAdapter adapter;
+    private RecyclerView recyclerView;
 
     private MoviePoster.Sorting sorting = MoviePoster.Sorting.mostPopular;
 
@@ -44,9 +38,12 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     private static final String LIST_STATE_KEY = "layoutBundleState";
     private Parcelable layoutState;
     private static final String SORTING_CHOICE = "currentSortingChoice";
+    private static final String SCROLL_INDEX_KEY = "mainScrollIndex";
+    private int scrollPosition;
 
     private void changeSortingFromAPITo(MoviePoster.Sorting sortingApiOverride) {
         sorting = sortingApiOverride;
+        scrollPosition = 0; // reset scroll position
     }
 
     private void getFavoriteMovies(){
@@ -59,20 +56,24 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             moviesFav = mDb.taskDao().loadAllTasks();
         }
 
+        // Detect changes to the local list of favorited movies
         moviesFav.observe(this, movieEntries -> {
             Timber.d("movie entries changed! count: (" + movieEntries.size() + ")");
 
-            if (movieEntries != null) {
-                MoviePoster[] movies = new MoviePoster[movieEntries.size()];
+            if(sorting == MoviePoster.Sorting.favorites){
+                if (movieEntries != null) {
+                    MoviePoster[] movies = new MoviePoster[movieEntries.size()];
 
-                for (int i = 0; i < movieEntries.size(); i++) {
-                    movies[i] = new MoviePoster(movieEntries.get(i));
+                    for (int i = 0; i < movieEntries.size(); i++) {
+                        movies[i] = new MoviePoster(movieEntries.get(i));
+                    }
+                    presentMoviesInUI(movies);
+
+                } else {
+                    Timber.d("FAILED; no movies were found in favorites to show!");
                 }
-                presentMoviesInUI(movies);
-
-            } else {
-                Timber.d("FAILED; no movies were found in favorites to show!");
             }
+
         });
     }
 
@@ -83,8 +84,12 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
         // Save list state
         layoutState = layoutManager.onSaveInstanceState();
+
         outState.putParcelable(LIST_STATE_KEY, layoutState);
         outState.putInt(SORTING_CHOICE, sorting.getIndex());
+
+        scrollPosition = layoutManager.findFirstVisibleItemPosition();
+        outState.putInt(SCROLL_INDEX_KEY, scrollPosition);
     }
 
     @Override
@@ -97,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             int val = savedInstanceState.getInt(SORTING_CHOICE, 0);
             sorting = MoviePoster.Sorting.makeFromIndex(val);
             applySorting(sorting);
+            scrollPosition = savedInstanceState.getInt(SCROLL_INDEX_KEY, 0);
         }
     }
 
@@ -115,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         Timber.plant();
         setContentView(R.layout.activity_main);
 
-        RecyclerView recyclerView = findViewById(R.id.rv_movie_list);
+        recyclerView = findViewById(R.id.rv_movie_list);
         int columns = 3;
 
         if (layoutManager == null) {
@@ -148,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         // update the list immediately with the texts found, while waiting for the images to download
         if (adapter != null) {
             adapter.setContentList(moviesFound, sorting);
+            layoutManager.scrollToPosition(scrollPosition);
             Timber.d("moviesFound: %s", moviesFound.length);
         }
     }
@@ -203,5 +210,4 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
                 break;
         }
     }
-
 }

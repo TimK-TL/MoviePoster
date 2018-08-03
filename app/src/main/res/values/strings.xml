@@ -13,4 +13,5 @@
     <string name="tv_trailers_title">Trailers</string>
     <string name="tv_reviews_title">Reviews</string>
     <string name="desc_movie_poster">Movie Poster</string>
+    <string name="toast_fav_clicked">Clicked FAV btn</string>
 </resources>

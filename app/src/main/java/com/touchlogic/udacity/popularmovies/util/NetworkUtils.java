@@ -21,10 +21,14 @@ import java.net.URL;
 import java.util.Scanner;
 
 
-public class NetworkUtils {
+public final class NetworkUtils {
 
     protected final static String MOVIEPOSTER_BASE_URL = "api.themoviedb.org";
     private final static String MOVIEPOSTER_BASE_IMAGE_URL = "image.tmdb.org";
+
+    private NetworkUtils(){
+
+    }
 
     /// Get new movies from the server based on the seleted sorting option
     public static void getMoviesBasedOnSorting(MoviePoster.Sorting networkSorting, RetrofitController.MoviePostersReturned moviePostersReturned){
